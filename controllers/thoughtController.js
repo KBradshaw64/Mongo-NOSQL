@@ -1,0 +1,2 @@
+// when creating a thought - need to grab username(req.body.username) and lookup user to push thought._id to their 'thoughts' array
+//when deleting  - create const thought = await Thought.findoneanddelete   grab username off the thought.username and pull from users 'thoughts' array
