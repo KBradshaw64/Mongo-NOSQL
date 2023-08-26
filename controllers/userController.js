@@ -1,58 +1,61 @@
 // need to edit to fit my naming conventions
+const { ObjectId } = require('mongoose').Types;
+const { User, Thought, Reaction } = require('../models/index');
 
 module.exports = {
     // Get all students
-    async getStudents(req, res) {
+    async getUsers(req, res) {
       try {
-        const students = await Student.find();
+        const users = await User.find();
   
-        const studentObj = {
-          students,
+        const userObj = {
+          users,
         };
   
-        res.json(studentObj);
+        res.json(userObj);
       } catch (err) {
         console.log(err);
         return res.status(500).json(err);
       }
     },
-    // Get a single student
-    async getSingleStudent(req, res) {
+    // Get a single user -- check to see if user_Id is correct
+    async getSingleUser(req, res) {
       try {
-        const student = await Student.findOne({ _id: req.params.studentId })
+        const user = await user.findOne({ _id: req.params.user_Id })
+        //not sure I understand the meaning or use for tracking revisions of a document
           .select('-__v');
   
-        if (!student) {
-          return res.status(404).json({ message: 'No student with that ID' })
+        if (!user) {
+          return res.status(404).json({ message: 'No user with that ID' })
         }
   
         res.json({
-          student,
+          user,
         });
       } catch (err) {
         console.log(err);
         return res.status(500).json(err);
       }
     },
-    // create a new student
-    async createStudent(req, res) {
+    // create a new user
+    async createUser(req, res) {
       try {
-        const student = await Student.create(req.body);
-        res.json(student);
+        const user = await User.create(req.body);
+        res.json(user);
       } catch (err) {
         res.status(500).json(err);
       }
     },
     // Delete a student and remove them from the course
-    async deleteStudent(req, res) {
+    async deleteUser(req, res) {
       try {
-        const student = await Student.findOneAndRemove({ _id: req.params.studentId });
+        const user = await User.findOneAndRemove({ _id: req.params.user_Id });
   
-        if (!student) {
-          return res.status(404).json({ message: 'No such student exists' });
+        if (!user) {
+          return res.status(404).json({ message: 'No such user exists' });
         }
 
-        res.json({ message: 'Student successfully deleted' });
+        res.json({ message: 'User successfully deleted' });
       } catch (err) {
         console.log(err);
         res.status(500).json(err);
@@ -60,44 +63,45 @@ module.exports = {
     },
   
     // change to add friends
-    async addAssignment(req, res) {
-      console.log('You are adding an assignment');
+    async addFriend(req, res) {
+      console.log('You are adding a friend');
       console.log(req.body);
   
       try {
-        const student = await Student.findOneAndUpdate(
-          { _id: req.params.studentId },
+        const user = await User.findOneAndUpdate(
+          { _id: req.params.user_Id },
           { $addToSet: { assignments: req.body } },
           { runValidators: true, new: true }
         );
   
-        if (!student) {
+        if (!user) {
           return res
             .status(404)
-            .json({ message: 'No student found with that ID :(' });
+            .json({ message: 'No user found with that ID :(' });
         }
   
-        res.json(student);
+        res.json(user);
       } catch (err) {
         res.status(500).json(err);
       }
     },
-    // Remove assignment from a student
-    async removeAssignment(req, res) {
+    // Remove friend from a user
+    //not sure about the line 94 $pull for the friend ID
+    async removeFriend(req, res) {
       try {
-        const student = await Student.findOneAndUpdate(
-          { _id: req.params.studentId },
-          { $pull: { assignment: { assignmentId: req.params.assignmentId } } },
+        const user = await User.findOneAndUpdate(
+          { _id: req.params.user_Id },
+          { $pull: { friends: { friends_Id: req.params.friends_Id } } },
           { runValidators: true, new: true }
         );
   
-        if (!student) {
+        if (!user) {
           return res
             .status(404)
-            .json({ message: 'No student found with that ID :(' });
+            .json({ message: 'No user found with that ID :(' });
         }
   
-        res.json(student);
+        res.json(user);
       } catch (err) {
         res.status(500).json(err);
       }
