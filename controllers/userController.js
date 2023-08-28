@@ -46,7 +46,7 @@ module.exports = {
         res.status(500).json(err);
       }
     },
-    // Delete a student and remove them from the course
+    // Delete a user
     async deleteUser(req, res) {
       try {
         const user = await User.findOneAndRemove({ _id: req.params.user_Id });
@@ -61,7 +61,23 @@ module.exports = {
         res.status(500).json(err);
       }
     },
-  
+    //update a user
+    async updateUser(req, res) {
+      try {
+        const user = await User.findOneAndUpdate(
+          { _id: req.params.user_Id },
+          { username: req.body.username },
+          { email: req.body.email },
+          );
+          if (!user) {
+            return res.status(404).json({message: 'No user found.'})
+          }
+          res.json(user);
+      } catch (err) {
+        res.status(500).json(err);
+        console.log(err);
+      }
+    },
     // change to add friends
     async addFriend(req, res) {
       console.log('You are adding a friend');
