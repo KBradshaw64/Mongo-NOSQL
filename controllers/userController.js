@@ -1,6 +1,4 @@
-// need to edit to fit my naming conventions
-const { ObjectId } = require('mongoose').Types;
-const { User, Thought, Reaction } = require('../models/index');
+const { User, Thought } = require('../models/index');
 
 module.exports = {
     // Get all students
@@ -21,9 +19,11 @@ module.exports = {
     // Get a single user -- check to see if user_Id is correct
     async getSingleUser(req, res) {
       try {
-        const user = await user.findOne({ _id: req.params.user_Id })
+        const user = await User.findOne({ _id: req.params.user_Id })
         //not sure I understand the meaning or use for tracking revisions of a document
-          .select('-__v');
+          .select('-__v')
+          .populate('thoughts')
+          .populate('friends');
   
         if (!user) {
           return res.status(404).json({ message: 'No user with that ID' })
@@ -49,7 +49,7 @@ module.exports = {
     // Delete a user
     async deleteUser(req, res) {
       try {
-        const user = await User.findOneAndRemove({ _id: req.params.user_Id });
+        const user = await User.findOneAndDelete({ _id: req.params.user_Id });
   
         if (!user) {
           return res.status(404).json({ message: 'No such user exists' });
@@ -65,9 +65,9 @@ module.exports = {
     async updateUser(req, res) {
       try {
         const user = await User.findOneAndUpdate(
-          { _id: req.params.user_Id },
-          { username: req.body.username },
-          { email: req.body.email },
+            { _id: req.params.user_Id },
+            { $set: req.body },
+            { runValidators: true, new: true }
           );
           if (!user) {
             return res.status(404).json({message: 'No user found.'})
@@ -86,7 +86,7 @@ module.exports = {
       try {
         const user = await User.findOneAndUpdate(
           { _id: req.params.user_Id },
-          { $addToSet: { assignments: req.body } },
+          { $addToSet: { friends: req.params.friends_Id } },
           { runValidators: true, new: true }
         );
   
@@ -107,7 +107,7 @@ module.exports = {
       try {
         const user = await User.findOneAndUpdate(
           { _id: req.params.user_Id },
-          { $pull: { friends: { friends_Id: req.params.friends_Id } } },
+          { $pull: { friends: req.params.friends_Id } },
           { runValidators: true, new: true }
         );
   
